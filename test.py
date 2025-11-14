@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 import math
 from pathlib import Path
@@ -16,17 +15,18 @@ from util import html
 from util.visualizer import save_images as save_images_to_web
 from voxelmorph.layers import SpatialTransformer
 from options import value
-# 如果发现网格被形变方向与训练相反，把它改成 -1
+
+# If the deformation direction of the grid is opposite to the training, change it to -1
 FLOW_SIGN = +1
 
 
-# -------------------- 工具：DP 兼容 & 特征捕获（B 方案） --------------------
+# -------------------- Utility: DP Compatibility & Feature Capture (Option B) --------------------
 def _unwrap_dp(m):
     return m.module if hasattr(m, "module") else m
 
 @torch.no_grad()
 def capture_multiscale_feats_from_netG(netG, x, target_sizes):
-    """从 netG 的中间层捕获多尺度特征；兜底用自建金字塔。"""
+    """Capture multi-scale features from netG's intermediate layers; fallback to custom pyramid."""
     net = _unwrap_dp(netG).eval()
     device = next(net.parameters()).device
     feats, handles = {}, []
@@ -65,7 +65,7 @@ def capture_multiscale_feats_from_netG(netG, x, target_sizes):
     return outs[0], outs[1]
 
 
-# -------------------- 标签路径解析 --------------------
+# -------------------- Label Path Parsing --------------------
 def resolve_label_root(dataroot: str, phase: str) -> Path | None:
     cands = [
         Path(dataroot) / f"{phase}A_label",
@@ -74,9 +74,9 @@ def resolve_label_root(dataroot: str, phase: str) -> Path | None:
     ]
     for p in cands:
         if p.exists():
-            print(f"[INFO] 使用标签根目录: {p}")
+            print(f"[INFO] Using label root directory: {p}")
             return p
-    print("[INFO] 未找到标签根目录（phaseA_label/trainA_label/testA_label），将跳过标签 warp。")
+    print("[INFO] Label root directory not found (phaseA_label/trainA_label/testA_label), skipping label warp.")
     return None
 
 def find_label_for_slice(label_root: Path, case: str, zname: str) -> Path | None:
@@ -96,13 +96,13 @@ def find_label_for_slice(label_root: Path, case: str, zname: str) -> Path | None
     return None
 
 
-# -------------------- 可视化与网页辅助 --------------------
+# -------------------- Visualization and Web Utilities --------------------
 def to_m1_1(x01: torch.Tensor) -> torch.Tensor:
-    """0~1 -> [-1,1]（网页保存用，避免发灰）"""
+    """0~1 -> [-1,1] (For web save to avoid grayish tone)"""
     return (x01 * 2.0 - 1.0).clamp(-1, 1)
 
 def ensure_nchw(x: torch.Tensor) -> torch.Tensor:
-    """确保是 NCHW。CHW/HW 自动补 batch 和/或通道。"""
+    """Ensure tensor is in NCHW format. If CHW/HW, automatically add batch and/or channel dimensions."""
     if x.dim() == 4:
         return x
     if x.dim() == 3:
@@ -127,7 +127,7 @@ def safe_visuals(model):
     return vis
 
 def test(opt):
-    # 固定化
+    # Fix configurations
     opt.num_threads = 0
     opt.batch_size = 1
     opt.serial_batches = True
@@ -140,28 +140,27 @@ def test(opt):
     if opt.eval:
         model.eval()
 
-    # 网页
+    # Web directory
     web_dir = os.path.join(opt.results_dir, opt.name, f"{opt.phase}_{opt.epoch}")
-    print("creating web directory", web_dir)
+    print("Creating web directory", web_dir)
     webpage = html.HTML(web_dir, f"Experiment = {opt.name}, Phase = {opt.phase}, Epoch = {opt.epoch}")
 
-    # 输出目录
+    # Output directory
     results_root = Path(opt.checkpoints_dir) / f"Results_{opt.name}"
     results_root.mkdir(parents=True, exist_ok=True)
 
-    # 标签根
+    # Label root
     label_root = resolve_label_root(opt.dataroot, opt.phase)
     phaseA = f"{opt.phase}A"
 
     for i, data in enumerate(dataset):
         if i >= opt.num_test:
             break
-        
-    
+
         model.set_input(data)
         model.test()
 
-        # ---- 解析病例 & 切片 ----
+        # ---- Parse case & slice ----
         a_path = Path(data["A_paths"][0])
         parts = a_path.parts
         idx = parts.index(phaseA) if phaseA in parts else max(j for j, p in enumerate(parts) if phaseA in p)
@@ -169,7 +168,7 @@ def test(opt):
         zname = a_path.name
         stem  = Path(zname).stem
 
-        # ---- 取视觉张量 ----
+        # ---- Get visual tensors ----
         device  = model.real_A.device
         H, W    = model.real_A.shape[-2], model.real_A.shape[-1]
         scale01 = lambda x: (x / 2.0 + 0.5).clamp(0, 1)
@@ -182,7 +181,7 @@ def test(opt):
         warped = scale01(vis.get("regA", ReconA))
         flow   = vis.get("dvf", None)
 
-        # ---- 若没有 dvf，则用 B 方案再算一次 ----
+        # ---- If no dvf, calculate it using option B ----
         if flow is None:
             target_sizes = [(H // 4, W // 4), (H // 8, W // 8)]
             enc, enc3 = capture_multiscale_feats_from_netG(model.netG, model.real_B, target_sizes)
@@ -208,22 +207,22 @@ def test(opt):
                 preds=pred_seg,
                 gts=lab_tensor,
                 threshold=0.5,
-                spacing=(1.0, 1.0)  # 如果有 NIfTI 原始 spacing，可以替换
+                spacing=(1.0, 1.0)  # Replace with NIfTI original spacing if available
             )
             meter.update(dsc_list, hd_list)
             print(f"[CASE {case} {stem}] DSC={dsc_list[0]:.3f}, HD95={hd_list[0]:.2f}")
 
-        # 可视化
-        grid_path = a_path.parent / "C:/Users/15381/Desktop/Phd.File/DFMIR-main2/deform256.jpg"   # 与切片同级
+        # Visualization
+        grid_path = a_path.parent / "XXX/deform256.jpg"   # Same level as slice
         if not grid_path.exists():
-            raise FileNotFoundError(f"缺少训练网格: {grid_path}")
+            raise FileNotFoundError(f"Missing training grid: {grid_path}")
         grid_img    = Image.open(grid_path).convert("RGB").resize((W, H), resample=Image.NEAREST)
         grid_tensor = ToTensor()(grid_img).unsqueeze(0).to(device)     # [1,3,H,W], 0~1
-        # 线条更干净（可选）
+        # Clean lines (optional)
         grid_tensor = (grid_tensor > 0.5).float()
         dvf_grid    = stn_nearest(grid_tensor, flow * FLOW_SIGN)       # [1,3,H,W], 0~1
 
-        # ---- 保存到结果目录 ----
+        # ---- Save to result directory ----
         save_dir = results_root / case / stem
         save_dir.mkdir(parents=True, exist_ok=True)
         torchvision.utils.save_image(moving,    str(save_dir / "moving.png"))
@@ -248,10 +247,10 @@ def test(opt):
 
     webpage.save()
     print("[SUMMARY]", meter.pretty(unit="voxels"))
-    print(f"[DONE] 网页: {web_dir}")
-    print(f"[DONE] 逐例图片: {results_root}")
+    print(f"[DONE] Webpage: {web_dir}")
+    print(f"[DONE] Per-case images: {results_root}")
 
 if __name__ == "__main__":
     opt = TestOptions().parse()
-    meter= value.MetricAverager()
+    meter = value.MetricAverager()
     test(opt)
