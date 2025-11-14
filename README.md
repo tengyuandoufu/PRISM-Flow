@@ -14,6 +14,7 @@ This project uses data from the [ADNI-4 dataset](https://adni.loni.usc.edu/)  an
 - Task 1 (MRI-to-CT) 
 - Task 2 (CBCT-to-CT)
 - Within each task, cases are categorized into three anatomical regions:Head-and-neck (HN),Thorax (TH),and Abdomen (AB)
+## 2.2 ADNI-4 dataset
 # 🔄 3.Preprocessing
 
 # 🚂 4.Training
@@ -22,3 +23,6 @@ Liunx: sh scripts/train.sh
 Windows: python train.py --gpu_ids=0(If you have more GPU, you can 0,1,2···)
 ```
 # ⚗️ 5.Testing
+```bash
+Liunx: sh scripts/test.sh
+Windows: python test.py --gpu_ids=0
