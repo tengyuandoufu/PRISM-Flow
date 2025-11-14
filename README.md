@@ -10,14 +10,16 @@ conda activate PRISM-Flow
 pip install -r requirements.txt
 ```
 # 📁 2.Dataset Preparation
-This project uses data from the [ADNI-4 dataset](https://adni.loni.usc.edu/)  and [SynthRAD2025 Grand Challenge dataset](https://zenodo.org/records/14918089).
+This project uses data from the [ADNI-4 dataset](https://adni.loni.usc.edu/)  and [SynthRAD2025 Grand Challenge dataset](https://zenodo.org/records/14918089).We conducted the registration of MR-CT, CBCT-CT, and PET-MR image data.
 ## 2.1 SynthRAD2025 dataset
 - Task 1 (MRI-to-CT) 
 - Task 2 (CBCT-to-CT)
 - Within each task, cases are categorized into three anatomical regions:Head-and-neck (HN),Thorax (TH),and Abdomen (AB)
 ## 2.2 ADNI-4 dataset
+- 18F-FBB PET
+- T1-weighted MR
 # 🔄 3.Preprocessing
-
+You just need to download the dataset and then preprocess it through the above two files(Segmentation mask preprocessing and preprocessing) to obtain a two-dimensional slice.
 # 🚂 4.Training
 ```bash
 Liunx: sh scripts/train.sh
