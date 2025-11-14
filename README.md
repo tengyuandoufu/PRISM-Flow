@@ -7,7 +7,7 @@ To set up the environment(It is not necessary to run the application on Linux. W
 conda create -n PRISM-Flow python=3.10
 conda activate PRISM-Flow
 pip install -r requirements.txt
-
+```
 # 📁 2.Dataset Preparation
 This project uses data from the [ADNI-4 dataset](https://adni.loni.usc.edu/)  and [SynthRAD2025 Grand Challenge dataset](https://zenodo.org/records/14918089).
 ## 2.1 SynthRAD2025 dataset
