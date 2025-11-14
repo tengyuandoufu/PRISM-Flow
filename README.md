@@ -1,5 +1,6 @@
 # PRISM-Flow：Unsupervised Cross-Modal Medical Image Registration via Optical Flow with Geometric Prior Guidance
 There is no time to release the code now because there are still supplementary materials that have not been written. We will wait for this month and the code will be released gradually.
+To facilitate broader reproducibility among Windows users, our code has been designed to operate natively on the Windows platform, eliminating the need for a Linux environment.
 # 🔨 1.Setup
 ## 1.1 Requirements
 To set up the environment. It is not necessary to run the application on Linux. We provide support for running it on Windows, and the system does not require an extensive amount of video memory—approximately 15 GB is sufficient.
