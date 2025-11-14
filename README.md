@@ -16,5 +16,9 @@ This project uses data from the [ADNI-4 dataset](https://adni.loni.usc.edu/)  an
 - Within each task, cases are categorized into three anatomical regions:Head-and-neck (HN),Thorax (TH),and Abdomen (AB)
 # 🔄 3.Preprocessing
 
-# 🚂 Training
-# ⚗️ Testing
+# 🚂 4.Training
+```bash
+Liunx: sh scripts/train.sh
+Windows: python train.py --gpu_ids=0(If you have more GPU, you can 0,1,2···)
+```
+# ⚗️ 5.Testing
