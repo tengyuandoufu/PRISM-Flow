@@ -2,7 +2,7 @@
 There is no time to release the code now because there are still supplementary materials that have not been written. We will wait for this month and the code will be released gradually.
 # 🔨 1.Setup
 ## 1.1 Requirements
-To set up the environment(It is not necessary to run the application on Linux. We provide support for running it on Windows, and the system does not require an extensive amount of video memory—approximately 15 GB is sufficient.):
+To set up the environment. It is not necessary to run the application on Linux. We provide support for running it on Windows, and the system does not require an extensive amount of video memory—approximately 15 GB is sufficient.
 ```bash
 conda create -n PRISM-Flow python=3.10
 conda activate PRISM-Flow
