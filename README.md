@@ -29,7 +29,7 @@ Windows: python train.py --gpu_ids=0(If you have more GPU, you can 0,1,2···)
 ```bash
 Liunx: sh scripts/test.sh
 Windows: python test.py --gpu_ids=0
-
+```
 # 🙏 6.Acknowledgements
 This codebase is based on:
 - [DFMIR](https://github.com/heyblackC/DFMIR)
